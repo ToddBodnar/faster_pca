@@ -176,13 +176,22 @@ public class test {
      */
     public static void calcTimeDistributions() throws Exception
     {
+        /*Visual analysis can be done with the R code:
+         * 
+          density(data$execution_time[which(data$method == "weka_pca")]) -> weka
+          density(data$execution_time[which(data$method == "fast_pca")]) -> fast
+          plot(fast,col="red",xlab="Execution time (milisecs)")
+          polygon(fast,col="red")
+          polygon(weka,col="blue")
+         * 
+         */
         System.out.println("Multiple time tests:");
         System.out.println("method,execution_time");
         for(int ct=0;ct<100;ct++)
         {
             for(boolean fast : new boolean[]{true,false})
             {
-                long time = testSpeed(100,10000,false,fast);
+                long time = testSpeed(100,10000,true,fast);
                 System.out.println((fast?"fast_pca":"weka_pca")+","+time);
             }
         }
