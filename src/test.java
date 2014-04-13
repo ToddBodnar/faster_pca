@@ -171,7 +171,23 @@ public class test {
         
     }
     
-    
+    /**
+     * No tests, but just generate the execution time multiple times to test for significance
+     */
+    public static void calcTimeDistributions() throws Exception
+    {
+        System.out.println("Multiple time tests:");
+        System.out.println("method,execution_time");
+        for(int ct=0;ct<100;ct++)
+        {
+            for(boolean fast : new boolean[]{true,false})
+            {
+                long time = testSpeed(100,10000,false,fast);
+                System.out.println((fast?"fast_pca":"weka_pca")+","+time);
+            }
+        }
+        System.out.println("\n\n");
+    }
     public static void testAccuracy() throws Exception
     {
         //because the change between weka and faster_pca is relativly small, we don't require too many accuracy tests, just enough to catch any stupid mistakes
@@ -280,6 +296,8 @@ public class test {
     
     public static void main(String args[]) throws Exception
     {
+        calcTimeDistributions();
+        
         
         System.out.println("Running tests of faster_pca\n");
         
