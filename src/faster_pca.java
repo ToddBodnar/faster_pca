@@ -113,7 +113,7 @@ public class faster_pca extends PrincipalComponents {
         
         
     for (int i = 0; i < m_NumAttribs; i++) {
-      for (int j = 0; j < m_NumAttribs; j++) {
+      for (int j = 0; j <= i; j++) {
 
         double cov = 0;
         for (int k = 0; k < m_NumInstances; k++) {
@@ -151,7 +151,7 @@ public class faster_pca extends PrincipalComponents {
     att1 = new double[m_NumInstances];
     att2 = new double[m_NumInstances];
     
-    double trainInstancesCopy[][] = new double[m_NumInstances][m_NumAttribs];
+    double trainInstancesCopy[][] = new double[m_NumAttribs][m_NumInstances];
     
     for( i=0;i< m_NumInstances; i++)
     {
@@ -160,22 +160,22 @@ public class faster_pca extends PrincipalComponents {
         
         for( j=0;j<m_NumAttribs;j++)
         {
-            trainInstancesCopy[i][j] = in.value(j);
+            trainInstancesCopy[j][i] = in.value(j);
         }
     }
 
     for (i = 0; i < m_NumAttribs; i++) {
-      for (j = 0; j < m_NumAttribs; j++) {
-        for (k = 0; k < m_NumInstances; k++) {
+      for (j = 0; j <= i; j++) {
+        /*for (k = 0; k < m_NumInstances; k++) {
           //att1[k] = m_TrainInstances.instance(k).value(i);
-          att1[k] = trainInstancesCopy[k][i];
+          att1[k] = trainInstancesCopy[i][k];
           //att2[k] = m_TrainInstances.instance(k).value(j);
-          att2[k] = trainInstancesCopy[k][j];
-        }
+          att2[k] = trainInstancesCopy[j][k];
+        }*/
         if (i == j) {
           m_Correlation[i][j] = 1.0;
         } else {
-          corr = Utils.correlation(att1, att2, m_NumInstances);
+          corr = Utils.correlation(trainInstancesCopy[i], trainInstancesCopy[j], m_NumInstances);
           m_Correlation[i][j] = corr;
           m_Correlation[j][i] = corr;
         }
@@ -193,7 +193,7 @@ public class faster_pca extends PrincipalComponents {
             mins[j] = Double.MAX_VALUE;
             maxs[j] = Double.MIN_VALUE;
             for ( i = 0; i < m_NumInstances; i++) { 
-                double val = trainInstancesCopy[i][j];
+                double val = trainInstancesCopy[j][i];
                 if(val < mins[j])
                     mins[j] = val;
                 if(val > maxs[j])
