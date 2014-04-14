@@ -181,8 +181,8 @@ public class test {
           density(data$execution_time[which(data$method == "weka_pca")]) -> weka
           density(data$execution_time[which(data$method == "fast_pca")]) -> fast
           plot(fast,col="red",xlab="Execution time (milisecs)")
-          polygon(fast,col="red")
-          polygon(weka,col="blue")
+          polygon(fast,col=rgb(1,0,0,alpha=.5))
+          polygon(weka,col=rgb(0,0,1,alpha=.5))
          * 
          */
         System.out.println("Multiple time tests:");

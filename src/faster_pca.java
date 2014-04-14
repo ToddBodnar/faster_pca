@@ -1,9 +1,11 @@
 
 import java.util.Enumeration;
 import java.util.Vector;
+import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.matrix.EigenvalueDecomposition;
 import weka.core.matrix.Matrix;
@@ -171,6 +173,93 @@ public class faster_pca extends PrincipalComponents {
   }
     
     
+   /**
+   * Transform an instance in original (unormalized) format.
+   * 
+   * @param instance an instance in the original (unormalized) format
+   * @return a transformed instance
+   * @throws Exception if instance can't be transformed
+   */
+  protected Instance convertInstance(Instance instance) throws Exception {
+    Instance result;
+    double[] newVals;
+    Instance tempInst;
+    double cumulative;
+    int i;
+    int j;
+    double tempval;
+    int numAttsLowerBound;
+
+    newVals = new double[m_OutputNumAtts];
+    tempInst = (Instance) instance.copy();
+
+    m_ReplaceMissingFilter.input(tempInst);
+    m_ReplaceMissingFilter.batchFinished();
+    tempInst = m_ReplaceMissingFilter.output();
+
+    m_NominalToBinaryFilter.input(tempInst);
+    m_NominalToBinaryFilter.batchFinished();
+    tempInst = m_NominalToBinaryFilter.output();
+
+    if (m_AttributeFilter != null) {
+      m_AttributeFilter.input(tempInst);
+      m_AttributeFilter.batchFinished();
+      tempInst = m_AttributeFilter.output();
+    }
+
+    if (!super.getCenterData()) {
+      m_standardizeFilter.input(tempInst);
+      m_standardizeFilter.batchFinished();
+      tempInst = m_standardizeFilter.output();
+    } else {
+      m_centerFilter.input(tempInst);
+      m_centerFilter.batchFinished();
+      tempInst = m_centerFilter.output();
+    }
+
+    if (m_HasClass) {
+      newVals[m_OutputNumAtts - 1] = instance.value(instance.classIndex());
+    }
+
+    if (m_MaxAttributes > 0) {
+      numAttsLowerBound = m_NumAttribs - m_MaxAttributes;
+    } else {
+      numAttsLowerBound = 0;
+    }
+    if (numAttsLowerBound < 0) {
+      numAttsLowerBound = 0;
+    }
+
+    double tempInstCpy[] = new double[m_NumAttribs];
+    for (j = 0; j < m_NumAttribs; j++) {
+        tempInstCpy[j] = tempInst.value(j);
+    }
+    
+    cumulative = 0;
+    for (i = m_NumAttribs - 1; i >= numAttsLowerBound; i--) {
+      tempval = 0.0;
+      for (j = 0; j < m_NumAttribs; j++) {
+        tempval += m_Eigenvectors[j][m_SortedEigens[i]] * tempInstCpy[j];
+      }
+
+      newVals[m_NumAttribs - i - 1] = tempval;
+      cumulative += m_Eigenvalues[m_SortedEigens[i]];
+      if ((cumulative / m_SumOfEigenValues) >= m_CoverVariance) {
+        break;
+      }
+    }
+
+    // create instance
+    if (instance instanceof SparseInstance) {
+      result = new SparseInstance(instance.weight(), newVals);
+    } else {
+      result = new DenseInstance(instance.weight(), newVals);
+    }
+
+    return result;
+  } 
+    
+    
     ///------ 1 to 1 copy from PrincipalComponents below
     /**
    * Initializes the filter with the given input data.
@@ -207,11 +296,11 @@ public class faster_pca extends PrincipalComponents {
 
     // delete any attributes with only one distinct value or are all missing
     deleteCols = new Vector<Integer>();
-    for (i = 0; i < m_TrainInstances.numAttributes(); i++) {
+    /*for (i = 0; i < m_TrainInstances.numAttributes(); i++) {
       if (m_TrainInstances.numDistinctValues(i) <= 1) {
         deleteCols.addElement(i);
       }
-    }
+    }*/
 
     if (m_TrainInstances.classIndex() >= 0) {
       // get rid of the class column
