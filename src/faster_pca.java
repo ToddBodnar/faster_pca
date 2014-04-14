@@ -1,5 +1,6 @@
 
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.Vector;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -16,7 +17,6 @@ import weka.filters.unsupervised.attribute.Center;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.PrincipalComponents;
 import weka.filters.unsupervised.attribute.Remove;
-import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.attribute.Standardize;
 
 /*
@@ -228,9 +228,9 @@ public class faster_pca extends PrincipalComponents {
     newVals = new double[m_OutputNumAtts];
     tempInst = (Instance) instance.copy();
 
-    m_ReplaceMissingFilter.input(tempInst);
+    /*m_ReplaceMissingFilter.input(tempInst);
     m_ReplaceMissingFilter.batchFinished();
-    tempInst = m_ReplaceMissingFilter.output();
+    tempInst = m_ReplaceMissingFilter.output();*/
 
     m_NominalToBinaryFilter.input(tempInst);
     m_NominalToBinaryFilter.batchFinished();
@@ -317,10 +317,10 @@ public class faster_pca extends PrincipalComponents {
     // column to append to the transformed data (if necessary)
     m_TrainCopy = new Instances(m_TrainInstances, 0);
 
-    m_ReplaceMissingFilter = new ReplaceMissingValues();
+    /*m_ReplaceMissingFilter = new ReplaceMissingValues();
     m_ReplaceMissingFilter.setInputFormat(m_TrainInstances);
     m_TrainInstances = Filter.useFilter(m_TrainInstances,
-      m_ReplaceMissingFilter);
+      m_ReplaceMissingFilter);*/
 
     m_NominalToBinaryFilter = new NominalToBinary();
     m_NominalToBinaryFilter.setInputFormat(m_TrainInstances);
