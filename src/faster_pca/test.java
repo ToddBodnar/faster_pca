@@ -1,3 +1,5 @@
+package faster_pca;
+
 
 import java.util.Random;
 import java.util.logging.Level;
@@ -316,6 +318,7 @@ public class test {
         
         
         System.out.println("Running tests of faster_pca\n");
+        testAccuracy();
         
         calcTimeDistributions();
         

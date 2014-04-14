@@ -1,3 +1,5 @@
+package faster_pca;
+
 
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -44,6 +46,11 @@ public class faster_pca extends PrincipalComponents {
   /** for serialization. */
   private static final long serialVersionUID = -296639299L;
 
+  public  faster_pca()
+          {
+      super();
+  }
+  
     @Override
     public String globalInfo() {
         return "PCA"; //todo: real info
