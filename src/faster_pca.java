@@ -75,9 +75,10 @@ public class faster_pca extends PrincipalComponents {
     }
 
     // now center the data by subtracting the mean
-    m_centerFilter = new Center();
+    //implemented below
+    /*m_centerFilter = new Center();
     m_centerFilter.setInputFormat(m_TrainInstances);
-    m_TrainInstances = Filter.useFilter(m_TrainInstances, m_centerFilter);
+    m_TrainInstances = Filter.useFilter(m_TrainInstances, m_centerFilter);*/
 
     // now compute the covariance matrix
     m_Correlation = new double[m_NumAttribs][m_NumAttribs];
@@ -88,7 +89,6 @@ public class faster_pca extends PrincipalComponents {
     for(int i=0;i< m_NumInstances; i++)
     {
         Instance in = m_TrainInstances.instance(i);
-        Enumeration enumer = in.enumerateAttributes();
         
         for(int j=0;j<m_NumAttribs;j++)
         {
@@ -96,6 +96,22 @@ public class faster_pca extends PrincipalComponents {
         }
     }
 
+    //center the data by subtracting the mean
+    double means[] = new double[m_NumAttribs];
+    
+        for (int j = 0; j < m_NumAttribs; j++) {
+            means[j] = 0;
+            for (int i = 0; i < m_NumInstances; i++) { //online learning of the mean
+                means[j] = means[j] + (trainInstancesCopy[i][j] - means[j])/(i+1);
+            }
+            for (int i = 0; i < m_NumInstances; i++) {//subtract the mean
+                trainInstancesCopy[i][j] -= means[j];
+            }
+        }
+        
+     f_center = new fast_center(means);
+        
+        
     for (int i = 0; i < m_NumAttribs; i++) {
       for (int j = 0; j < m_NumAttribs; j++) {
 
@@ -167,9 +183,28 @@ public class faster_pca extends PrincipalComponents {
     }
 
     // now standardize the input data
-    m_standardizeFilter = new Standardize();
+    /*m_standardizeFilter = new Standardize();
     m_standardizeFilter.setInputFormat(m_TrainInstances);
-    m_TrainInstances = Filter.useFilter(m_TrainInstances, m_standardizeFilter);
+    m_TrainInstances = Filter.useFilter(m_TrainInstances, m_standardizeFilter);*/ //todo: see if this line actually needs called
+    double mins[] = new double[m_NumAttribs];
+    double maxs[] = new double[m_NumAttribs];
+    
+        for ( j = 0; j < m_NumAttribs; j++) {
+            mins[j] = Double.MAX_VALUE;
+            maxs[j] = Double.MIN_VALUE;
+            for ( i = 0; i < m_NumInstances; i++) { 
+                double val = trainInstancesCopy[i][j];
+                if(val < mins[j])
+                    mins[j] = val;
+                if(val > maxs[j])
+                    maxs[j] = val;
+            }
+            
+        }
+        
+     f_norm = new fast_normalize(mins,maxs);
+    
+    
   }
     
     
@@ -208,15 +243,13 @@ public class faster_pca extends PrincipalComponents {
     }
 
     if (!super.getCenterData()) {
-      m_standardizeFilter.input(tempInst);
-      m_standardizeFilter.batchFinished();
-      tempInst = m_standardizeFilter.output();
+      
+      tempInst = f_norm.filter(tempInst);
     } else {
-      m_centerFilter.input(tempInst);
-      m_centerFilter.batchFinished();
-      tempInst = m_centerFilter.output();
+      
+      tempInst = f_center.filter(tempInst);
     }
-
+    
     if (m_HasClass) {
       newVals[m_OutputNumAtts - 1] = instance.value(instance.classIndex());
     }
@@ -395,6 +428,9 @@ public class faster_pca extends PrincipalComponents {
     return (numPendingOutput() != 0);
   }
 
+  
+  fast_center f_center;
+  fast_normalize f_norm;
 
     
 }
