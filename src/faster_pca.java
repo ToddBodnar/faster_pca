@@ -414,9 +414,11 @@ public class faster_pca extends PrincipalComponents {
     if (!isFirstBatchDone()) {
       setup(insts);
     }
+    
+    Iterator<Instance> iter = insts.iterator();
 
-    for (i = 0; i < insts.numInstances(); i++) {
-      inst = convertInstance(insts.instance(i));
+    while(iter.hasNext()) {
+      inst = convertInstance(iter.next());
       inst.setDataset(getOutputFormat());
       push(inst);
     }
