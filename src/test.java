@@ -1,4 +1,5 @@
 
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import weka.core.Instance;
@@ -186,13 +187,17 @@ public class test {
          * 
          */
         System.out.println("Multiple time tests:");
-        System.out.println("method,execution_time");
+        System.out.println("method,feature_count,execution_time");
         for(int ct=0;ct<100;ct++)
         {
+            //int features = 100;
+            for(int features : new int[]{10,100,1000})
+            {
             for(boolean fast : new boolean[]{true,false})
             {
-                long time = testSpeed(100,10000,true,fast);
-                System.out.println((fast?"fast_pca":"weka_pca")+","+time);
+                long time = testSpeed(features,10000,false,fast);
+                System.out.println((fast?"fast_pca":"weka_pca")+","+features+","+time);
+            }
             }
         }
         System.out.println("\n\n");
@@ -202,10 +207,12 @@ public class test {
         //because the change between weka and faster_pca is relativly small, we don't require too many accuracy tests, just enough to catch any stupid mistakes
         //todo: add accuracy tests
         System.out.println("In accuracy tests");
+        Random r = new Random();
         for(int ct=1;ct<=10;ct++)
         {
             System.out.print("Comparing centered results from PCA and faster_pca ("+ct+"/10)\tMean Sq Difference: ");
             RDG1 randomdatagen = new RDG1();
+            randomdatagen.setRandom(r);
         randomdatagen.setNumAttributes(100);
         randomdatagen.setNumExamples(10000);
         randomdatagen.defineDataFormat();
@@ -305,13 +312,21 @@ public class test {
     
     public static void main(String args[]) throws Exception
     {
-        calcTimeDistributions();
+        
         
         
         System.out.println("Running tests of faster_pca\n");
         
+        calcTimeDistributions();
+        
         
         testAccuracy();
+        
+        
+        
+        
+        
+        
         System.out.println("\n\n");
         testSpeed();
         
@@ -322,5 +337,6 @@ public class test {
         
     }
 
+    
    
 }
